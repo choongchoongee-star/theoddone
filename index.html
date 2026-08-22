@@ -10,6 +10,10 @@
     <div id="app">
       <canvas id="game"></canvas>
       <div class="noise"></div>
+      <div id="round-transition" class="round-transition" aria-hidden="true"><span data-ko="관찰 시작" data-en="OBSERVATION START">관찰 시작</span></div>
+      <div id="verdict-feedback" class="verdict-feedback" aria-live="assertive" aria-hidden="true">
+        <i></i><span id="verdict-label"></span>
+      </div>
       <header class="hud top-hud">
         <button id="mobile-pause" class="mobile-ui mobile-pause" aria-label="게임 일시정지"><span aria-hidden="true">Ⅱ</span><b data-ko="정지" data-en="PAUSE">정지</b></button>
         <div class="top-actions">
