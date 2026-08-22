@@ -168,8 +168,6 @@ for (const [x, z] of [[-24,-24],[24,-24],[-24,24],[24,24]] as [number,number][])
   const lamp = new THREE.PointLight(0xf4b942, 17, 12, 2); lamp.position.set(x, 5.7, z); environment.add(lamp);lampLights.push(lamp);
   const bulb = new THREE.Mesh(new THREE.SphereGeometry(.24, 10, 8), new THREE.MeshBasicMaterial({color:0xf4b942})); bulb.position.copy(lamp.position); environment.add(bulb);
 }
-for (const [x,z,w,d] of [[-18,0,4,10],[18,0,4,10],[0,-18,10,4],[0,18,10,4]] as [number,number,number,number][]) box([w,.38,d],0x45453e,x,.19,z);
-
 const bellRig = new THREE.Group();
 const bellPost = new THREE.Mesh(new THREE.CylinderGeometry(.18,.22,6,10), new THREE.MeshStandardMaterial({color:0x232421}));
 bellPost.position.y=3; bellRig.add(bellPost);
