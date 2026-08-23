@@ -93,6 +93,8 @@ button:focus-visible { outline: 2px solid var(--yellow-soft); outline-offset: 3p
 .rule-note { width: 100%; min-height: 58px; display: grid; grid-template-columns: 18px 30px minmax(0,1fr); align-items: center; gap: 9px; padding: 8px 13px; border: 0; border-bottom: 1px solid rgba(43,53,55,.2); background: transparent; color: #1d1c16; text-align: left; cursor: pointer; }
 .rule-note[hidden] { display: none; }
 .rule-note:hover { background: rgba(255,255,255,.22); }
+.rule-note:focus-visible { outline: 0; }
+.rule-note:focus-visible .note-index { box-shadow: none; }
 .note-index { font: 500 10px var(--font-ui); opacity: .4; }
 .note-mark { display: grid; place-items: center; width: 27px; height: 27px; border: 1px solid rgba(29,28,22,.42); font: 700 18px var(--font-ui); font-style: normal; }
 .note-copy { min-width: 0; }
@@ -137,8 +139,6 @@ body:not(.touch-mode) .note-copy small { color: #f4f1e8; opacity: 1; }
 .touch-mode .rule-note[aria-disabled="true"] { display: none; }
 .touch-mode .rule-note:hover { background: transparent; }
 .touch-mode .rule-note:active { color: var(--yellow-soft); }
-.touch-mode .rule-note:focus-visible { outline: 0; }
-.touch-mode .rule-note:focus-visible .note-index { box-shadow: 0 0 0 1px var(--yellow-soft); }
 .touch-mode .note-index { display: grid; place-items: center; width: 27px; height: 30px; border-left: 2px solid rgba(244,185,66,.78); background: linear-gradient(90deg,rgba(10,11,9,.56),rgba(10,11,9,.12)); color: rgba(244,241,232,.84); font-weight: 700; opacity: 1; }
 .touch-mode .note-mark { display: none; }
 .touch-mode .rule-note.mark-question .note-index::after { content: '?'; color: #77c9ff; }
