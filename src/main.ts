@@ -1821,7 +1821,7 @@ addEventListener('blur',handleBrowserFocusLoss);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)handleBrowserFocusLoss()});
 addEventListener('pagehide',restoreSystemCursor);
 addEventListener('beforeunload',restoreSystemCursor);
-addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;if(touchMode)camera.fov=innerHeight>innerWidth?72:62;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);if(touchMode)applyMobileCamera()});
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;if(touchMode)camera.fov=innerHeight>innerWidth?72:62;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);if(touchMode&&!resolvingAccusation&&!verdictCamera)applyMobileCamera()});
 
 applyLanguage();
 const incomingSharedResult=parseSharedResult();if(incomingSharedResult)openShareScreen(incomingSharedResult,'link');
