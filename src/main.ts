@@ -1383,6 +1383,10 @@ function focusVerdictCamera(subject:Subject,duration=.62) {
   verdictCamera={startPosition:camera.position.clone(),endPosition,startQuaternion:camera.quaternion.clone(),endQuaternion,startedAt:performance.now(),duration};
 }
 
+function restoreVerdictCamera(position:THREE.Vector3,quaternion:THREE.Quaternion,duration=.48) {
+  verdictCamera={startPosition:camera.position.clone(),endPosition:position,startQuaternion:camera.quaternion.clone(),endQuaternion:quaternion,startedAt:performance.now(),duration};
+}
+
 function updateVerdictCamera(now:number) {
   if(!verdictCamera)return;
   const progress=THREE.MathUtils.clamp((now-verdictCamera.startedAt)/(verdictCamera.duration*1000),0,1);const eased=THREE.MathUtils.smootherstep(progress,0,1);
@@ -1394,19 +1398,35 @@ function clearVerdictSequence() {
   verdictSequenceId++;resolvingAccusation=false;verdictCamera=null;hideVerdictFeedback();document.body.classList.remove('verdict-active');
 }
 
+function beginRecoverableWrongVerdict(subject:Subject) {
+  const sequence=++verdictSequenceId;const returnPosition=camera.position.clone();const returnQuaternion=camera.quaternion.clone();
+  resolvingAccusation=true;keys.clear();cancelTouchPointers();document.body.classList.add('verdict-active');syncAudioMix();
+  subject.marker.material.color.set(0xe65b47);subject.marker.material.opacity=1;focusVerdictCamera(subject,.5);
+  setVerdictFeedback('wrong',copy('오답','WRONG'));playInterfaceSound('wrong');
+  window.setTimeout(()=>{
+    if(sequence!==verdictSequenceId)return;
+    hideVerdictFeedback();restoreVerdictCamera(returnPosition,returnQuaternion);
+  },850);
+  window.setTimeout(()=>{
+    if(sequence!==verdictSequenceId)return;
+    camera.position.copy(returnPosition);camera.quaternion.copy(returnQuaternion);verdictCamera=null;resolvingAccusation=false;document.body.classList.remove('verdict-active');syncAudioMix();
+    showToast(copy(`${subject.name} 확인 완료 · 기회 ${attempts}번 남음`,`${subject.name} INSPECTED · ${attempts} CHANCE${attempts===1?'':'S'} LEFT`),true,1400);
+  },1380);
+}
+
 function beginVerdict(subject:Subject,success:boolean) {
   updateRoundClock();const frozenElapsed=roundElapsedTime;const sequence=++verdictSequenceId;
   resolvingAccusation=true;playing=false;paused=false;keys.clear();cancelTouchPointers();restoreSystemCursor();setFollowSubject(null,false);selectSubject(null);syncAudioMix();
-  document.body.classList.add('verdict-active');subject.marker.material.color.set(success?0xf4b942:0xe65b47);subject.marker.material.opacity=1;focusVerdictCamera(subject);
+  document.body.classList.add('verdict-active');subject.marker.material.color.set(success?0xf4b942:0xe65b47);subject.marker.material.opacity=1;focusVerdictCamera(subject,.5);
   setVerdictFeedback(success?'success':'wrong',success?copy('정답','CONFIRMED'):copy('오답','WRONG'));playInterfaceSound(success?'success':'wrong');
   if(success) {
-    window.setTimeout(()=>{if(sequence!==verdictSequenceId)return;roundElapsedTime=frozenElapsed;endRound(true,true)},900);return;
+    window.setTimeout(()=>{if(sequence!==verdictSequenceId)return;roundElapsedTime=frozenElapsed;endRound(true,true)},1000);return;
   }
   window.setTimeout(()=>{
     if(sequence!==verdictSequenceId)return;
     const odd=subjects[oddId];subject.marker.material.opacity=0;odd.marker.material.color.set(0xf4b942);odd.marker.material.opacity=1;focusVerdictCamera(odd,.55);setVerdictFeedback('reveal',copy(`정답 · ${odd.name}`,`THE ODD ONE · ${odd.name}`));playInterfaceSound('reveal');
-  },650);
-  window.setTimeout(()=>{if(sequence!==verdictSequenceId)return;roundElapsedTime=frozenElapsed;endRound(false,true)},1700);
+  },850);
+  window.setTimeout(()=>{if(sequence!==verdictSequenceId)return;roundElapsedTime=frozenElapsed;endRound(false,true)},1950);
 }
 
 function accuse(subject=hovered) {
@@ -1417,7 +1437,7 @@ function accuse(subject=hovered) {
   subject.marker.material.color.set(0xe65b47);
   if(touchMode)selectSubject(null);
   if(attempts<=0){beginVerdict(subject,false);return;}
-  playInterfaceSound('wrong');showToast(copy(`${subject.name} 확인 완료 · 기회 ${attempts}번 남음`,`${subject.name} INSPECTED · ${attempts} CHANCE${attempts===1?'':'S'} LEFT`),true,1600);
+  beginRecoverableWrongVerdict(subject);
 }
 
 function updateAttempts(){const el=document.querySelector('#attempts')!;el.innerHTML='';for(let i=0;i<attemptLimit;i++){const bar=document.createElement('i');bar.className=`attempt${i>=attempts?' lost':''}`;el.appendChild(bar)}el.setAttribute('aria-label',copy(`고발 기회 ${attempts}번 남음`,`${attempts} attempts remaining`))}
@@ -1812,7 +1832,7 @@ function frame(){
   lampLights.forEach((lamp,index)=>lamp.intensity=17*(.97+Math.sin(now*.0007+index*1.73)*.025));
   if(verdictCamera)updateVerdictCamera(now);
   if(playing){updateRoundClock();document.querySelector('#timer')!.textContent=`${String(Math.floor(roundElapsedTime/60)).padStart(2,'0')}:${String(Math.floor(roundElapsedTime%60)).padStart(2,'0')}`;}
-  if(playing&&!paused){
+  if(playing&&!paused&&!resolvingAccusation){
     const simulationDt=realDt*gameSpeed;const actionDt=realDt*Math.sqrt(gameSpeed);simulationTime+=simulationDt;bellTimer-=simulationDt;bell.scale.lerp(new THREE.Vector3(1,1,1),simulationDt*5);
     if(bellVisualTime>0){bellVisualTime=Math.max(0,bellVisualTime-simulationDt);bell.rotation.z=Math.sin((1.2-bellVisualTime)*25)*bellVisualTime*.16;}else bell.rotation.z=THREE.MathUtils.lerp(bell.rotation.z,0,Math.min(1,simulationDt*7));
     if(bellTimer<=0)ringBell();updateObservationScheduler(simulationDt);activeSubjects.forEach(s=>updateSubject(s,simulationDt,actionDt));proximityTimer-=simulationDt;
