@@ -556,14 +556,14 @@ function readControlsAcknowledged() {
 }
 
 function readRulesDismissed() {
-  try { return localStorage.getItem('the-odd-one-rules-v3')==='hidden'; }
+  try { return localStorage.getItem('the-odd-one-rules-v4')==='hidden'; }
   catch { return false; }
 }
 
 function rememberRulesDismissed() {
   if(!dontShowRules.checked)return;
   rulesDismissed=true;
-  try { localStorage.setItem('the-odd-one-rules-v3','hidden'); }
+  try { localStorage.setItem('the-odd-one-rules-v4','hidden'); }
   catch { /* The rules screen will simply appear again next time. */ }
 }
 

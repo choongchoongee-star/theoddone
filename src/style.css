@@ -220,11 +220,7 @@ body:not(.touch-mode) .note-copy small { color: #f4f1e8; opacity: 1; }
 .rules-chances { margin: 10px 0 18px !important; color: var(--yellow) !important; font-size: 12px !important; font-weight: 700; }
 .rules-example { padding: 12px 14px; border-left: 3px solid var(--yellow); background: rgba(244,185,66,.08); }
 .rules-example > span { display: block; margin-bottom: 7px; color: var(--yellow); font-size: 10px; font-weight: 700; }
-.rules-example-labels, .rules-example-action { display: grid; grid-template-columns: minmax(0,1fr) 26px minmax(0,1fr); align-items: center; gap: 8px; }
-.rules-example-labels { margin-bottom: 3px; color: rgba(244,241,232,.48); font-size: 10px; }
-.rules-example-labels small:last-child { grid-column: 3; }
-.rules-example-action b, .rules-example-action strong { font-size: 13px; }
-.rules-example i { color: var(--yellow); font-size: 17px; font-style: normal; }
+.rules-example-sentence { margin: 0 !important; color: #f4f1e8 !important; font-size: 13px !important; font-weight: 600; line-height: 1.5 !important; word-break: keep-all; }
 .rules-steps { margin: 0; padding: 0; list-style: none; border-top: 1px solid rgba(255,255,255,.17); }
 .rules-steps li { min-height: 72px; display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,.13); }
 .rules-steps li > span { display: flex; flex-wrap: wrap; gap: 2px 6px; }
@@ -275,9 +271,7 @@ body:not(.touch-mode) .note-copy small { color: #f4f1e8; opacity: 1; }
     background: linear-gradient(110deg, rgba(246,185,54,.09), rgba(246,185,54,.025));
   }
   .rules-example > span { margin-bottom: 18px; font-size: 11px; letter-spacing: .08em; }
-  .rules-example-labels { margin-bottom: 7px; font-size: 11px; }
-  .rules-example-action b, .rules-example-action strong { font-size: 16px; font-weight: 600; }
-  .rules-example i { font-size: 20px; text-align: center; }
+  .rules-example-sentence { font-size: 16px !important; }
   .rules-steps { grid-area: steps; border-top: 0; }
   .rules-steps li { min-height: 0; align-items: flex-start; padding: 0 0 16px; }
   .rules-steps li + li { padding-top: 16px; }
@@ -539,8 +533,7 @@ kbd.wide-key { min-width: 80px; }
   .rules-dialog h2 { font-size: 34px; }
   .rules-chances { margin: 8px 0 12px !important; }
   .rules-example { padding: 9px 11px; }
-  .rules-example-labels, .rules-example-action { grid-template-columns: minmax(0,1fr) 22px minmax(0,1fr); gap: 6px; }
-  .rules-example-action b, .rules-example-action strong { font-size: 12px; }
+  .rules-example-sentence { font-size: 12px !important; }
   .rules-steps li { min-height: 62px; padding: 7px 0; }
   .rules-steps strong { font-size: 12px; }
   .rules-steps small { font-size: 10px; line-height: 1.42; }
