@@ -1425,8 +1425,8 @@ function beginVerdict(subject:Subject,success:boolean) {
   window.setTimeout(()=>{
     if(sequence!==verdictSequenceId)return;
     const odd=subjects[oddId];subject.marker.material.opacity=0;odd.marker.material.color.set(0xf4b942);odd.marker.material.opacity=1;focusVerdictCamera(odd,.55);setVerdictFeedback('reveal',copy(`정답 · ${odd.name}`,`THE ODD ONE · ${odd.name}`));playInterfaceSound('reveal');
-  },850);
-  window.setTimeout(()=>{if(sequence!==verdictSequenceId)return;roundElapsedTime=frozenElapsed;endRound(false,true)},1950);
+  },1700);
+  window.setTimeout(()=>{if(sequence!==verdictSequenceId)return;roundElapsedTime=frozenElapsed;endRound(false,true)},2800);
 }
 
 function accuse(subject=hovered) {
