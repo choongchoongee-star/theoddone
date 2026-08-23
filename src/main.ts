@@ -749,6 +749,7 @@ function renderRuleNotes() {
   mobileBellStatus.textContent=`🔔 ${bellNote[language]}`;
   ruleNoteRows.forEach((row,index)=>{
     const ruleId=RULE_NOTE_ORDER[index];
+    row.classList.toggle('bell-note',ruleId==='bell');
     row.hidden=!ruleId;
     if(!ruleId)return;
     row.dataset.ruleNote=ruleId;
