@@ -79,16 +79,16 @@ interface VerdictCameraAnimation {
 }
 
 const RULES: RuleDefinition[] = [
-  { id:'redJump', action:'jump', stimulus:'red', label:{ko:'빨강 점프',en:'RED JUMP'}, note:{ko:'빨간 옷 근처 → 점프',en:'Near a red shirt → JUMP'} },
-  { id:'blueSpin', action:'spin', stimulus:'blue', label:{ko:'파랑 회전',en:'BLUE SPIN'}, note:{ko:'파란 옷 근처 → 회전',en:'Near a blue shirt → SPIN'} },
-  { id:'yellowWave', action:'wave', stimulus:'yellow', label:{ko:'노랑 인사',en:'YELLOW WAVE'}, note:{ko:'노란 옷 근처 → 손 흔들기',en:'Near a yellow shirt → WAVE'} },
-  { id:'hatBow', action:'bow', stimulus:'hat', label:{ko:'모자에게 인사',en:'HAT BOW'}, note:{ko:'모자 쓴 사람 근처 → 허리 숙이기',en:'Near a hat → BOW'} },
-  { id:'centerCrouch', action:'crouch', label:{ko:'중앙 쪼그리기',en:'CENTER CROUCH'}, note:{ko:'중앙 구역 진입 → 쪼그려 앉기',en:'Enter the center → CROUCH'} },
-  { id:'edgeStar', action:'star', label:{ko:'가장자리 별 자세',en:'EDGE STAR'}, note:{ko:'맵 가장자리 진입 → 별 자세',en:'Enter the map edge → STAR POSE'} },
-  { id:'bellZoneSideKick', action:'sideKick', label:{ko:'종탑 옆차기',en:'BELL TOWER SIDE KICK'}, note:{ko:'종탑 근처 진입 → 옆차기',en:'Approach the bell tower → SIDE KICK'} },
-  { id:'lampSideStep', action:'sideStep', label:{ko:'조명 스텝',en:'LAMP SIDE-STEP'}, note:{ko:'모서리 조명 근처 → 좌우 스텝',en:'Approach a corner lamp → SIDE-STEP'} },
-  { id:'greetingWave', action:'wave', label:{ko:'마주보기 인사',en:'GREETING WAVE'}, note:{ko:'다른 NPC와 서로 마주봄 → 손 흔들기',en:'Face another NPC → WAVE'} },
-  { id:'turnSpin', action:'spin', label:{ko:'방향 전환 회전',en:'TURN SPIN'}, note:{ko:'이동 목표 도착 → 회전',en:'Reach a waypoint → SPIN'} },
+  { id:'redJump', action:'jump', stimulus:'red', label:{ko:'빨강 점프',en:'RED JUMP'}, note:{ko:'빨간 옷을 입은 사람 가까이 가면 점프합니다.',en:'Jumps when near someone in a red shirt.'} },
+  { id:'blueSpin', action:'spin', stimulus:'blue', label:{ko:'파랑 회전',en:'BLUE SPIN'}, note:{ko:'파란 옷을 입은 사람 가까이 가면 회전합니다.',en:'Spins when near someone in a blue shirt.'} },
+  { id:'yellowWave', action:'wave', stimulus:'yellow', label:{ko:'노랑 인사',en:'YELLOW WAVE'}, note:{ko:'노란 옷을 입은 사람 가까이 가면 손을 흔듭니다.',en:'Waves when near someone in a yellow shirt.'} },
+  { id:'hatBow', action:'bow', stimulus:'hat', label:{ko:'모자에게 인사',en:'HAT BOW'}, note:{ko:'모자를 쓴 사람 가까이 가면 허리를 숙입니다.',en:'Bows when near someone wearing a hat.'} },
+  { id:'centerCrouch', action:'crouch', label:{ko:'중앙 쪼그리기',en:'CENTER CROUCH'}, note:{ko:'중앙 구역에 들어가면 쪼그려 앉습니다.',en:'Crouches when entering the center zone.'} },
+  { id:'edgeStar', action:'star', label:{ko:'가장자리 별 자세',en:'EDGE STAR'}, note:{ko:'맵 가장자리에 들어가면 별 자세를 합니다.',en:'Makes a star pose when entering the map edge.'} },
+  { id:'bellZoneSideKick', action:'sideKick', label:{ko:'종탑 옆차기',en:'BELL TOWER SIDE KICK'}, note:{ko:'종탑 근처에 가면 옆차기를 합니다.',en:'Side-kicks when approaching the bell tower.'} },
+  { id:'lampSideStep', action:'sideStep', label:{ko:'조명 스텝',en:'LAMP SIDE-STEP'}, note:{ko:'모서리 조명 근처에 가면 좌우 스텝을 합니다.',en:'Side-steps when approaching a corner lamp.'} },
+  { id:'greetingWave', action:'wave', label:{ko:'마주보기 인사',en:'GREETING WAVE'}, note:{ko:'다른 사람과 서로 마주 보면 손을 흔듭니다.',en:'Waves when facing another person.'} },
+  { id:'turnSpin', action:'spin', label:{ko:'방향 전환 회전',en:'TURN SPIN'}, note:{ko:'이동 목표에 도착하면 한 바퀴 회전합니다.',en:'Spins once after reaching a waypoint.'} },
 ];
 const PARTICIPANT_OPTIONS = [6,9,12] as const;
 const RANKED_SEQUENCE = [6,9,12] as const;
@@ -102,6 +102,7 @@ let RULE_NOTE_ORDER:RuleNoteId[]=[...RULES.slice(0,4).map(rule=>rule.id),'bell']
 const ruleNoteMarks={} as Record<RuleNoteId,RuleNoteMark>;
 [...RULES.map(rule=>rule.id),'bell' as const].forEach(ruleId=>ruleNoteMarks[ruleId]=null);
 const ACTION_LABELS:Record<ActionName,LocalizedCopy>={jump:{ko:'점프',en:'JUMP'},wave:{ko:'손 흔들기',en:'WAVE'},spin:{ko:'회전',en:'SPIN'},bow:{ko:'허리 숙이기',en:'BOW'},crouch:{ko:'쪼그려 앉기',en:'CROUCH'},sideKick:{ko:'옆차기',en:'SIDE KICK'},sideStep:{ko:'좌우 스텝',en:'SIDE-STEP'},star:{ko:'별 자세',en:'STAR POSE'}};
+const ACTION_VERBS:Record<ActionName,LocalizedCopy>={jump:{ko:'점프합니다',en:'jump'},wave:{ko:'손을 흔듭니다',en:'wave'},spin:{ko:'회전합니다',en:'spin'},bow:{ko:'허리를 숙입니다',en:'bow'},crouch:{ko:'쪼그려 앉습니다',en:'crouch'},sideKick:{ko:'옆차기를 합니다',en:'side-kick'},sideStep:{ko:'좌우 스텝을 합니다',en:'side-step'},star:{ko:'별 자세를 합니다',en:'make a star pose'}};
 const ACTION_DURATION:Record<ActionName,number>={jump:1.25,wave:1.25,spin:1.3,bow:1.25,crouch:1.45,sideKick:1.25,sideStep:1.4,star:1.25};
 
 const canvas = document.querySelector<HTMLCanvasElement>('#game')!;
@@ -353,7 +354,6 @@ const ruleCountSummary=document.querySelector<HTMLElement>('#rule-count-summary'
 const attemptCountSummary=document.querySelector<HTMLElement>('#attempt-count-summary')!;
 const rulesChances=document.querySelector<HTMLElement>('#rules-chances')!;
 const ruleCountBadge=document.querySelector<HTMLElement>('#rule-count-badge')!;
-const desktopNoteHelp=document.querySelector<HTMLElement>('#desktop-note-help')!;
 const ruleNotes=document.querySelector<HTMLElement>('#rule-notes')!;
 const ruleNotesToggle=document.querySelector<HTMLButtonElement>('#rule-notes-toggle')!;
 const ruleNoteRows=[...document.querySelectorAll<HTMLButtonElement>('[data-rule-note]')];
@@ -745,8 +745,8 @@ function setRuleNotesOpen(value:boolean) {
 
 function renderRuleNotes() {
   RULE_NOTE_ORDER=[...activeRules.map(rule=>rule.id),'bell'];
-  desktopNoteHelp.textContent=copy(`1–${activeRules.length}: ? → ✓ → 취소선 → 해제`,`1–${activeRules.length}: ? → ✓ → STRIKE → CLEAR`);
-  mobileBellStatus.textContent=copy(`🔔 강제 ${ACTION_LABELS[bellAction].ko}`,`🔔 ${ACTION_LABELS[bellAction].en}`);
+  const bellNote={ko:`종이 울리면 일부 참가자가 ${ACTION_VERBS[bellAction].ko}.`,en:`When the bell rings, some NPCs ${ACTION_VERBS[bellAction].en}.`};
+  mobileBellStatus.textContent=`🔔 ${bellNote[language]}`;
   ruleNoteRows.forEach((row,index)=>{
     const ruleId=RULE_NOTE_ORDER[index];
     row.hidden=!ruleId;
@@ -754,17 +754,14 @@ function renderRuleNotes() {
     row.dataset.ruleNote=ruleId;
     const indexLabel=row.querySelector<HTMLElement>('.note-index')!;indexLabel.textContent=ruleId==='bell'?'🔔':String(index+1);
     row.setAttribute('aria-disabled',String(ruleId==='bell'));row.tabIndex=ruleId==='bell'?-1:0;
-    const title=row.querySelector<HTMLElement>('.note-copy b')!;
     const detail=row.querySelector<HTMLElement>('.note-copy small')!;
     if(ruleId==='bell') {
-      const label={ko:`종 ${ACTION_LABELS[bellAction].ko}`,en:`BELL ${ACTION_LABELS[bellAction].en}`};
-      const note={ko:`일부 참가자 강제 ${ACTION_LABELS[bellAction].ko}`,en:`Forces some NPCs to ${ACTION_LABELS[bellAction].en}`};
-      title.dataset.ko=label.ko;title.dataset.en=label.en;detail.dataset.ko=note.ko;detail.dataset.en=note.en;
+      detail.dataset.ko=bellNote.ko;detail.dataset.en=bellNote.en;
     } else {
       const rule=RULES.find(candidate=>candidate.id===ruleId)!;
-      title.dataset.ko=rule.label.ko;title.dataset.en=rule.label.en;detail.dataset.ko=rule.note.ko;detail.dataset.en=rule.note.en;
+      detail.dataset.ko=rule.note.ko;detail.dataset.en=rule.note.en;
     }
-    title.textContent=title.dataset[language]??'';detail.textContent=detail.dataset[language]??'';
+    detail.textContent=detail.dataset[language]??'';
   });
 }
 
@@ -775,7 +772,7 @@ function updateRuleNote(ruleId:RuleNoteId) {
     row.setAttribute('aria-label',language==='ko'?'종 교란 이벤트. 체크할 수 없는 참고 정보입니다.':'Bell distraction event. Informational only.');return;
   }
   const mark=ruleNoteMarks[ruleId];row.classList.toggle('mark-question',mark==='?');row.classList.toggle('mark-check',mark==='✓');row.classList.toggle('mark-strike',mark==='strike');
-  const label=row.querySelector('.note-copy b')?.textContent??ruleId;
+  const label=row.querySelector('.note-copy small')?.textContent??ruleId;
   const state=language==='ko'?(mark==='?'?'의심':mark==='✓'?'확인':mark==='strike'?'제외':'표시 없음'):(mark==='?'?'questioned':mark==='✓'?'checked':mark==='strike'?'ruled out':'unmarked');
   row.setAttribute('aria-label',language==='ko'?`${label}: ${state}. 눌러서 표시 변경.`:`${label}: ${state}. Cycle checklist mark.`);
 }
