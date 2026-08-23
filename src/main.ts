@@ -1379,8 +1379,8 @@ function focusVerdictCamera(subject:Subject,duration=.62) {
   const target=subjectFocus(subject);const outward=camera.position.clone().sub(target);outward.y=0;
   if(outward.lengthSq()<.01)outward.set(0,0,1);outward.normalize();outward.y=.28;outward.normalize();
   const endPosition=target.clone().addScaledVector(outward,touchMode?7.2:8.2);
-  const looker=new THREE.Object3D();looker.position.copy(endPosition);looker.lookAt(target);
-  verdictCamera={startPosition:camera.position.clone(),endPosition,startQuaternion:camera.quaternion.clone(),endQuaternion:looker.quaternion.clone(),startedAt:performance.now(),duration};
+  const lookMatrix=new THREE.Matrix4().lookAt(endPosition,target,camera.up);const endQuaternion=new THREE.Quaternion().setFromRotationMatrix(lookMatrix);
+  verdictCamera={startPosition:camera.position.clone(),endPosition,startQuaternion:camera.quaternion.clone(),endQuaternion,startedAt:performance.now(),duration};
 }
 
 function updateVerdictCamera(now:number) {
