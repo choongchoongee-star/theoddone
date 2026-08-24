@@ -149,7 +149,9 @@ const ACTION_VERBS:Record<ActionName,LocalizedCopy>={jump:{ko:'점프합니다',
 const ACTION_DURATION:Record<ActionName,number>={jump:1.25,wave:1.25,spin:1.3,bow:1.25,crouch:1.45,sideKick:1.25,sideStep:1.4,star:1.25};
 
 const canvas = document.querySelector<HTMLCanvasElement>('#game')!;
-const touchMode = matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0 || new URLSearchParams(location.search).has('touch');
+const pageParams = new URLSearchParams(location.search);
+const qaMode = pageParams.get('qa') === '1';
+const touchMode = matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0 || pageParams.has('touch');
 document.body.classList.toggle('touch-mode', touchMode);
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setPixelRatio(Math.min(devicePixelRatio, touchMode ? 1.5 : 2));
@@ -1641,6 +1643,11 @@ function accuse(subject=hovered) {
 function updateAttempts(){const el=document.querySelector('#attempts')!;el.innerHTML='';for(let i=0;i<attemptLimit;i++){const bar=document.createElement('i');bar.className=`attempt${i>=attempts?' lost':''}`;el.appendChild(bar)}el.setAttribute('aria-label',copy(`고발 기회 ${attempts}번 남음`,`${attempts} attempts remaining`))}
 let toastTimeout=0;
 function showToast(message:string,bad=false,duration=1200){const el=document.querySelector('#toast')!;el.textContent=message;el.className=`toast show${bad?' bad':''}`;clearTimeout(toastTimeout);toastTimeout=window.setTimeout(()=>el.className='toast',duration)}
+function revealQaAnswer(){
+  if(!qaMode||!playing||paused||roundResult)return;
+  const oddSubject=subjects[oddId];
+  showToast(`${copy('QA 정답','QA ANSWER')} · ${oddSubject.name} · ${targetRule.label[language]}`,false,8000);
+}
 
 function setPaused(value:boolean) {
   if(!playing||paused===value)return;
@@ -2025,7 +2032,21 @@ document.addEventListener('click',event=>{
   playInterfaceSound('click');
 });
 addEventListener('mousemove',e=>{if(document.pointerLockElement!==canvas)return;if(followedSubject){desktopFollowSpherical.theta-=e.movementX*.0028;desktopFollowSpherical.phi=THREE.MathUtils.clamp(desktopFollowSpherical.phi-e.movementY*.0028,.35,1.4);applyDesktopFollowCamera();return}yaw-=e.movementX*.0022;pitch-=e.movementY*.0022;pitch=THREE.MathUtils.clamp(pitch,-1.35,1.35);camera.rotation.set(pitch,yaw,0)});
-addEventListener('keydown',e=>{if(leaderboardScreen.classList.contains('open')){if(e.code==='Escape'){e.preventDefault();closeLeaderboard()}return}if(tutorialOfferScreen.classList.contains('open')){if(e.code==='Escape'){e.preventDefault();closeTutorialOffer()}return}if(tutorialIntroScreen.classList.contains('open')){if(e.code==='Escape'){e.preventDefault();closeTutorialIntroToHome()}return}if(rulesScreen.classList.contains('open')){if(e.code==='Escape')e.preventDefault();return}if(controlsScreen.classList.contains('open')){e.preventDefault();if(e.code==='Escape'&&controlsOrigin==='pause')closeControls();return}if((e.code==='AltLeft'||e.code==='AltRight')&&playing&&!paused&&!touchMode){e.preventDefault();if(!e.repeat)setAltCursorMode(!altCursorMode);return}if(e.code==='Escape'&&playing){e.preventDefault();if(paused)setPaused(false);else if(touchMode||document.pointerLockElement!==canvas)setPaused(true);return}const noteIndex=['Digit1','Digit2','Digit3','Digit4'].indexOf(e.code);if(noteIndex>=0&&noteIndex<activeRules.length&&playing&&!paused&&!e.repeat){e.preventDefault();cycleRuleNote(RULE_NOTE_ORDER[noteIndex]);return}if((e.code==='PageUp'||e.code==='PageDown')&&playing&&!paused&&!touchMode){e.preventDefault();adjustDesktopZoom(e.code==='PageUp'?-1:1);return}if(e.code==='KeyF'&&playing&&!paused&&!touchMode&&!e.repeat){e.preventDefault();toggleFollow(hovered||followedSubject);return}if(!paused)keys.add(e.code)});addEventListener('keyup',e=>keys.delete(e.code));
+addEventListener('keydown',e=>{
+  if(leaderboardScreen.classList.contains('open')){if(e.code==='Escape'){e.preventDefault();closeLeaderboard()}return}
+  if(tutorialOfferScreen.classList.contains('open')){if(e.code==='Escape'){e.preventDefault();closeTutorialOffer()}return}
+  if(tutorialIntroScreen.classList.contains('open')){if(e.code==='Escape'){e.preventDefault();closeTutorialIntroToHome()}return}
+  if(rulesScreen.classList.contains('open')){if(e.code==='Escape')e.preventDefault();return}
+  if(controlsScreen.classList.contains('open')){e.preventDefault();if(e.code==='Escape'&&controlsOrigin==='pause')closeControls();return}
+  if(qaMode&&e.code==='KeyO'&&e.ctrlKey&&e.shiftKey&&e.altKey&&playing){e.preventDefault();if(!e.repeat)revealQaAnswer();return}
+  if((e.code==='AltLeft'||e.code==='AltRight')&&!e.ctrlKey&&!e.shiftKey&&playing&&!paused&&!touchMode){e.preventDefault();if(!e.repeat)setAltCursorMode(!altCursorMode);return}
+  if(e.code==='Escape'&&playing){e.preventDefault();if(paused)setPaused(false);else if(touchMode||document.pointerLockElement!==canvas)setPaused(true);return}
+  const noteIndex=['Digit1','Digit2','Digit3','Digit4'].indexOf(e.code);
+  if(noteIndex>=0&&noteIndex<activeRules.length&&playing&&!paused&&!e.repeat){e.preventDefault();cycleRuleNote(RULE_NOTE_ORDER[noteIndex]);return}
+  if((e.code==='PageUp'||e.code==='PageDown')&&playing&&!paused&&!touchMode){e.preventDefault();adjustDesktopZoom(e.code==='PageUp'?-1:1);return}
+  if(e.code==='KeyF'&&playing&&!paused&&!touchMode&&!e.repeat){e.preventDefault();toggleFollow(hovered||followedSubject);return}
+  if(!paused)keys.add(e.code)
+});addEventListener('keyup',e=>keys.delete(e.code));
 addEventListener('wheel',e=>{if(!touchMode&&playing&&!paused){e.preventDefault();adjustDesktopZoom(Math.sign(e.deltaY))}},{passive:false});
 document.addEventListener('pointerlockchange',()=>{
   if(document.pointerLockElement===canvas) {
