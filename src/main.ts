@@ -460,6 +460,7 @@ let leaderboardEntries:LeaderboardEntry[]=[];
 let leaderboardLoading=false;
 let leaderboardFailed=false;
 let rankedSaveState:'saving'|'saved'|'unchanged'|'error'|null=null;
+let rankedPlacement:number|null=null;
 let rankedRunState:'idle'|'active'|'completed'|'failed'='idle';
 let rankedStageIndex=0;
 let rankedTotalScore=0;
@@ -675,6 +676,15 @@ function renderLeaderboard() {
   });
 }
 
+function findLeaderboardPlacement(entries:LeaderboardEntry[],uid:string) {
+  let displayedRank=0;
+  for(let index=0;index<entries.length;index++) {
+    if(index===0||entries[index].score!==entries[index-1].score)displayedRank=index+1;
+    if(entries[index].uid===uid)return displayedRank<=10?displayedRank:null;
+  }
+  return null;
+}
+
 async function refreshLeaderboard() {
   leaderboardLoading=true;leaderboardFailed=false;renderLeaderboard();
   try { leaderboardEntries=await loadLeaderboard(); }
@@ -707,7 +717,7 @@ function closeRankIntro() {
 }
 
 function beginRankedRun() {
-  rankedRunState='active';rankedStageIndex=0;rankedTotalScore=0;rankedTotalTimeMs=0;rankedWrongGuesses=0;latestRoundScore=0;rankedSaveState=null;
+  rankedRunState='active';rankedStageIndex=0;rankedTotalScore=0;rankedTotalTimeMs=0;rankedWrongGuesses=0;latestRoundScore=0;rankedSaveState=null;rankedPlacement=null;
   setParticipantCount(RANKED_SEQUENCE[0]);closeRankIntro();requestStartRound();
 }
 
@@ -1857,6 +1867,7 @@ function updateResultCopy(){
   if(tutorial&&success&&tutorialStageIndex===TUTORIAL_STAGES.length-1)resultTitle.textContent=copy('튜토리얼 완료!','TUTORIAL COMPLETE!');
   else if(tutorial&&success)resultTitle.textContent=copy(`${tutorialStageIndex+1}단계 완료`,`STAGE ${tutorialStageIndex+1} COMPLETE`);
   else if(tutorial)resultTitle.textContent=copy('다시 관찰해 보세요.','TRY OBSERVING AGAIN.');
+  else if(rankedRunState==='completed'&&rankedPlacement!==null)resultTitle.textContent=copy(`${rankedPlacement}위 달성!`,`RANK #${rankedPlacement} ACHIEVED!`);
   else if(rankedRunState==='completed')resultTitle.textContent=copy('랭크 완주!','RANKED RUN COMPLETE!');
   else if(rankedRunState==='failed')resultTitle.textContent=copy('랭크 도전 실패','RANKED RUN FAILED');
   else if(ranked&&success)resultTitle.textContent=copy(`${participantCount}명 클리어`,`CLEARED ${participantCount} NPCS`);
@@ -1913,6 +1924,15 @@ async function saveCompletedRankedRun() {
     try { localStorage.setItem('the-odd-one-ranked-name',nickname); } catch { /* Keep the name for this session only. */ }
     const improved=await submitBestScore(user,nickname,submission.score,submission.timeMs,submission.wrongGuesses);
     if(requestId!==rankedSaveRequestId)return;
+    try {
+      leaderboardEntries=await loadLeaderboard();
+      rankedPlacement=findLeaderboardPlacement(leaderboardEntries,user.uid);
+      leaderboardFailed=false;
+    } catch(error) {
+      console.warn('Leaderboard placement could not be loaded.',error);
+      rankedPlacement=null;
+    }
+    if(requestId!==rankedSaveRequestId)return;
     rankedSaveState=improved?'saved':'unchanged';updateResultCopy();
   } catch(error) {
     if(requestId!==rankedSaveRequestId)return;
@@ -1944,7 +1964,7 @@ function endRound(success:boolean,preserveElapsed=false){
 
 function resetRankedRun() {
   rankedSaveRequestId++;authBusy=false;rankSubmitButton.disabled=false;
-  rankedRunState='active';rankedStageIndex=0;rankedTotalScore=0;rankedTotalTimeMs=0;rankedWrongGuesses=0;latestRoundScore=0;rankedSaveState=null;rankNameError.textContent='';rankSubmitPanel.hidden=true;setParticipantCount(RANKED_SEQUENCE[0]);
+  rankedRunState='active';rankedStageIndex=0;rankedTotalScore=0;rankedTotalTimeMs=0;rankedWrongGuesses=0;latestRoundScore=0;rankedSaveState=null;rankedPlacement=null;rankNameError.textContent='';rankSubmitPanel.hidden=true;setParticipantCount(RANKED_SEQUENCE[0]);
 }
 
 function handleReplay() {
@@ -1968,7 +1988,7 @@ function returnToStartScreen(){
   document.querySelector('#pause-screen')!.classList.remove('open');document.querySelector('#pause-screen')!.setAttribute('aria-hidden','true');
   document.querySelector('#end-screen')!.classList.remove('open');controlsScreen.classList.remove('open');controlsScreen.setAttribute('aria-hidden','true');rulesScreen.classList.remove('open');rulesScreen.setAttribute('aria-hidden','true');rankIntroScreen.classList.remove('open');rankIntroScreen.setAttribute('aria-hidden','true');tutorialOfferScreen.classList.remove('open');tutorialOfferScreen.setAttribute('aria-hidden','true');tutorialIntroScreen.classList.remove('open');tutorialIntroScreen.setAttribute('aria-hidden','true');tutorialHud.hidden=true;
   document.querySelector('#start-screen')!.classList.add('open');
-  rankedRunState='idle';rankedSaveState=null;scoreSummary.hidden=true;rankSubmitPanel.hidden=true;rankNameError.textContent='';
+  rankedRunState='idle';rankedSaveState=null;rankedPlacement=null;scoreSummary.hidden=true;rankSubmitPanel.hidden=true;rankNameError.textContent='';
   tutorialResultStatus.hidden=true;
   if(gameMode==='tutorial'){setGameMode('casual');setParticipantCount(6);}
   clearTimeout(toastTimeout);document.querySelector('#toast')!.className='toast';

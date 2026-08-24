@@ -84,7 +84,7 @@ export async function loadLeaderboard() {
     collection(db, RANKED_SCORE_COLLECTION),
     orderBy('score', 'desc'),
     orderBy('totalTimeMs', 'asc'),
-    limit(100),
+    limit(10),
   ));
 
   return snapshot.docs.map(entry => entry.data() as LeaderboardEntry);
