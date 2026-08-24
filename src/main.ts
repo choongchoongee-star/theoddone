@@ -114,6 +114,7 @@ const ENCOUNTER_RULE_IDS:EncounterRuleId[]=['redJump','blueSpin','yellowWave','h
 const SUBJECT_NAMES = ['영수','영호','영식','영철','광수','상철','민수','준호','태수','성훈','진우','동진','영숙','정숙','순자','영자','옥순','현숙','지영','수진','민지','혜진','은영','보람'];
 const ARENA_SIZES:Record<ParticipantCount,number>={4:26,6:30,9:38,12:44};
 const TUTORIAL_COMPLETED_KEY='the-odd-one-tutorial-completed-v1';
+const TUTORIAL_OFFER_SEEN_KEY='the-odd-one-tutorial-offer-seen-v1';
 const TUTORIAL_STAGES:TutorialStage[]=[
   {
     participants:4,rules:['centerCrouch'],targetRuleId:'centerCrouch',oddSubjectIndex:3,noiseObeyerIndices:[],bellRuleId:null,bellObeyerIndices:[],
@@ -411,6 +412,9 @@ const gameModeButtons=[...document.querySelectorAll<HTMLButtonElement>('[data-ga
 const participantSelector=document.querySelector<HTMLElement>('.participant-selector')!;
 const rankSequenceSummary=document.querySelector<HTMLElement>('#rank-sequence-summary')!;
 const rankIntroScreen=document.querySelector<HTMLElement>('#rank-intro-screen')!;
+const tutorialOfferScreen=document.querySelector<HTMLElement>('#tutorial-offer-screen')!;
+const tutorialOfferStartButton=document.querySelector<HTMLButtonElement>('#tutorial-offer-start')!;
+const tutorialOfferSkipButton=document.querySelector<HTMLButtonElement>('#tutorial-offer-skip')!;
 const tutorialButton=document.querySelector<HTMLButtonElement>('#tutorial-button')!;
 const tutorialIntroScreen=document.querySelector<HTMLElement>('#tutorial-intro-screen')!;
 const tutorialStartButton=document.querySelector<HTMLButtonElement>('#tutorial-start-button')!;
@@ -446,6 +450,8 @@ const shareFeedback=document.querySelector<HTMLElement>('#share-feedback')!;
 let gameMode:GameMode='casual';
 let tutorialStageIndex=0;
 let tutorialCompleted=readTutorialCompleted();
+let tutorialOfferSeen=readTutorialOfferSeen();
+let tutorialOfferMode:Exclude<GameMode,'tutorial'>='casual';
 let authBusy=false;
 let roundStarting=false;
 let leaderboardEntries:LeaderboardEntry[]=[];
@@ -484,6 +490,17 @@ function rememberTutorialCompleted() {
   updateTutorialUI();
 }
 
+function readTutorialOfferSeen() {
+  try { return localStorage.getItem(TUTORIAL_OFFER_SEEN_KEY)==='yes'; }
+  catch { return false; }
+}
+
+function rememberTutorialOfferSeen() {
+  tutorialOfferSeen=true;
+  try { localStorage.setItem(TUTORIAL_OFFER_SEEN_KEY,'yes'); }
+  catch { /* The recommendation may appear again in a later session. */ }
+}
+
 function readLanguage():Language {
   try { return localStorage.getItem('the-odd-one-language')==='en'?'en':'ko'; }
   catch { return 'ko'; }
@@ -515,6 +532,7 @@ function applyLanguage() {
   if(activeShareResult)renderShareResult(activeShareResult);
   updateGameModeUI();
   updateTutorialUI();
+  updateTutorialOfferUI();
   if(leaderboardScreen.classList.contains('open'))renderLeaderboard();
 }
 
@@ -564,6 +582,46 @@ function updateTutorialUI() {
   });
 }
 
+function updateTutorialOfferUI() {
+  tutorialOfferSkipButton.textContent=tutorialOfferMode==='ranked'?copy('랭크 도전 계속','CONTINUE TO RANKED'):copy('일반 게임 계속','CONTINUE TO CASUAL');
+}
+
+function shouldOfferTutorial() {
+  const existingPlayer=controlsAcknowledged||rulesDismissed;
+  return !tutorialCompleted&&!tutorialOfferSeen&&!existingPlayer;
+}
+
+function openTutorialOffer() {
+  tutorialOfferMode=gameMode==='ranked'?'ranked':'casual';
+  updateTutorialOfferUI();
+  tutorialOfferScreen.classList.add('open');tutorialOfferScreen.setAttribute('aria-hidden','false');
+  setTimeout(()=>tutorialOfferStartButton.focus(),0);
+}
+
+function closeTutorialOffer() {
+  tutorialOfferScreen.classList.remove('open');tutorialOfferScreen.setAttribute('aria-hidden','true');
+  document.querySelector<HTMLButtonElement>('#play-button')!.focus();
+}
+
+function continueSelectedModeStart(mode:Exclude<GameMode,'tutorial'>=gameMode==='ranked'?'ranked':'casual') {
+  if(mode==='ranked')openRankIntro();
+  else requestStartRound();
+}
+
+function requestSelectedModeStart() {
+  if(shouldOfferTutorial()){openTutorialOffer();return;}
+  continueSelectedModeStart();
+}
+
+function acceptTutorialOffer() {
+  closeTutorialOffer();beginTutorial();
+}
+
+function skipTutorialOffer() {
+  const mode=tutorialOfferMode;
+  rememberTutorialOfferSeen();closeTutorialOffer();continueSelectedModeStart(mode);
+}
+
 function openTutorialIntro() {
   setGameMode('tutorial');
   setParticipantCount(TUTORIAL_STAGES[tutorialStageIndex].participants);
@@ -581,6 +639,7 @@ function closeTutorialIntroToHome() {
 }
 
 function beginTutorial() {
+  rememberTutorialOfferSeen();
   tutorialStageIndex=0;
   openTutorialIntro();
 }
@@ -1900,7 +1959,7 @@ function returnToStartScreen(){
   document.body.classList.remove('round-active','paused','selection-active','cursor-free');
   setRuleNotesOpen(false);
   document.querySelector('#pause-screen')!.classList.remove('open');document.querySelector('#pause-screen')!.setAttribute('aria-hidden','true');
-  document.querySelector('#end-screen')!.classList.remove('open');controlsScreen.classList.remove('open');controlsScreen.setAttribute('aria-hidden','true');rulesScreen.classList.remove('open');rulesScreen.setAttribute('aria-hidden','true');rankIntroScreen.classList.remove('open');rankIntroScreen.setAttribute('aria-hidden','true');tutorialIntroScreen.classList.remove('open');tutorialIntroScreen.setAttribute('aria-hidden','true');tutorialHud.hidden=true;
+  document.querySelector('#end-screen')!.classList.remove('open');controlsScreen.classList.remove('open');controlsScreen.setAttribute('aria-hidden','true');rulesScreen.classList.remove('open');rulesScreen.setAttribute('aria-hidden','true');rankIntroScreen.classList.remove('open');rankIntroScreen.setAttribute('aria-hidden','true');tutorialOfferScreen.classList.remove('open');tutorialOfferScreen.setAttribute('aria-hidden','true');tutorialIntroScreen.classList.remove('open');tutorialIntroScreen.setAttribute('aria-hidden','true');tutorialHud.hidden=true;
   document.querySelector('#start-screen')!.classList.add('open');
   rankedRunState='idle';rankedSaveState=null;scoreSummary.hidden=true;rankSubmitPanel.hidden=true;rankNameError.textContent='';
   tutorialResultStatus.hidden=true;
@@ -1908,7 +1967,9 @@ function returnToStartScreen(){
   clearTimeout(toastTimeout);document.querySelector('#toast')!.className='toast';
 }
 
-document.querySelector('#play-button')!.addEventListener('click',()=>gameMode==='ranked'?openRankIntro():requestStartRound());
+document.querySelector('#play-button')!.addEventListener('click',requestSelectedModeStart);
+tutorialOfferStartButton.addEventListener('click',acceptTutorialOffer);
+tutorialOfferSkipButton.addEventListener('click',skipTutorialOffer);
 tutorialButton.addEventListener('click',beginTutorial);
 tutorialStartButton.addEventListener('click',startTutorialStage);
 document.querySelector('#tutorial-cancel-button')!.addEventListener('click',closeTutorialIntroToHome);
@@ -1964,7 +2025,7 @@ document.addEventListener('click',event=>{
   playInterfaceSound('click');
 });
 addEventListener('mousemove',e=>{if(document.pointerLockElement!==canvas)return;if(followedSubject){desktopFollowSpherical.theta-=e.movementX*.0028;desktopFollowSpherical.phi=THREE.MathUtils.clamp(desktopFollowSpherical.phi-e.movementY*.0028,.35,1.4);applyDesktopFollowCamera();return}yaw-=e.movementX*.0022;pitch-=e.movementY*.0022;pitch=THREE.MathUtils.clamp(pitch,-1.35,1.35);camera.rotation.set(pitch,yaw,0)});
-addEventListener('keydown',e=>{if(leaderboardScreen.classList.contains('open')){if(e.code==='Escape'){e.preventDefault();closeLeaderboard()}return}if(tutorialIntroScreen.classList.contains('open')){if(e.code==='Escape'){e.preventDefault();closeTutorialIntroToHome()}return}if(rulesScreen.classList.contains('open')){if(e.code==='Escape')e.preventDefault();return}if(controlsScreen.classList.contains('open')){e.preventDefault();if(e.code==='Escape'&&controlsOrigin==='pause')closeControls();return}if((e.code==='AltLeft'||e.code==='AltRight')&&playing&&!paused&&!touchMode){e.preventDefault();if(!e.repeat)setAltCursorMode(!altCursorMode);return}if(e.code==='Escape'&&playing){e.preventDefault();if(paused)setPaused(false);else if(touchMode||document.pointerLockElement!==canvas)setPaused(true);return}const noteIndex=['Digit1','Digit2','Digit3','Digit4'].indexOf(e.code);if(noteIndex>=0&&noteIndex<activeRules.length&&playing&&!paused&&!e.repeat){e.preventDefault();cycleRuleNote(RULE_NOTE_ORDER[noteIndex]);return}if((e.code==='PageUp'||e.code==='PageDown')&&playing&&!paused&&!touchMode){e.preventDefault();adjustDesktopZoom(e.code==='PageUp'?-1:1);return}if(e.code==='KeyF'&&playing&&!paused&&!touchMode&&!e.repeat){e.preventDefault();toggleFollow(hovered||followedSubject);return}if(!paused)keys.add(e.code)});addEventListener('keyup',e=>keys.delete(e.code));
+addEventListener('keydown',e=>{if(leaderboardScreen.classList.contains('open')){if(e.code==='Escape'){e.preventDefault();closeLeaderboard()}return}if(tutorialOfferScreen.classList.contains('open')){if(e.code==='Escape'){e.preventDefault();closeTutorialOffer()}return}if(tutorialIntroScreen.classList.contains('open')){if(e.code==='Escape'){e.preventDefault();closeTutorialIntroToHome()}return}if(rulesScreen.classList.contains('open')){if(e.code==='Escape')e.preventDefault();return}if(controlsScreen.classList.contains('open')){e.preventDefault();if(e.code==='Escape'&&controlsOrigin==='pause')closeControls();return}if((e.code==='AltLeft'||e.code==='AltRight')&&playing&&!paused&&!touchMode){e.preventDefault();if(!e.repeat)setAltCursorMode(!altCursorMode);return}if(e.code==='Escape'&&playing){e.preventDefault();if(paused)setPaused(false);else if(touchMode||document.pointerLockElement!==canvas)setPaused(true);return}const noteIndex=['Digit1','Digit2','Digit3','Digit4'].indexOf(e.code);if(noteIndex>=0&&noteIndex<activeRules.length&&playing&&!paused&&!e.repeat){e.preventDefault();cycleRuleNote(RULE_NOTE_ORDER[noteIndex]);return}if((e.code==='PageUp'||e.code==='PageDown')&&playing&&!paused&&!touchMode){e.preventDefault();adjustDesktopZoom(e.code==='PageUp'?-1:1);return}if(e.code==='KeyF'&&playing&&!paused&&!touchMode&&!e.repeat){e.preventDefault();toggleFollow(hovered||followedSubject);return}if(!paused)keys.add(e.code)});addEventListener('keyup',e=>keys.delete(e.code));
 addEventListener('wheel',e=>{if(!touchMode&&playing&&!paused){e.preventDefault();adjustDesktopZoom(Math.sign(e.deltaY))}},{passive:false});
 document.addEventListener('pointerlockchange',()=>{
   if(document.pointerLockElement===canvas) {
