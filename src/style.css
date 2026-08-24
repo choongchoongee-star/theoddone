@@ -133,6 +133,7 @@ body:not(.touch-mode) .note-copy small { color: #f4f1e8; opacity: 1; }
 .touch-mode .rule-notes header b { color: var(--yellow); font-size: 11px; font-weight: 700; }
 .touch-mode .mobile-bell-status { min-width: 0; display: block; overflow: hidden; color: #f4f1e8; font-size: 10px; text-align: right; text-overflow: ellipsis; white-space: nowrap; }
 .touch-mode .rule-notes header button { display: none; }
+.mobile-bell-status[hidden] { display: none !important; }
 .touch-mode .rule-note-list { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 2px 8px; overflow: visible; }
 .touch-mode .rule-note { min-width: 0; min-height: 44px; grid-template-columns: 27px minmax(0,1fr); gap: 5px; padding: 1px 0; border: 0; color: #f4f1e8; text-shadow: 0 2px 8px rgba(0,0,0,.95); }
 .touch-mode .rule-note[hidden] { display: none; }
@@ -210,6 +211,9 @@ body:not(.touch-mode) .note-copy small { color: #f4f1e8; opacity: 1; }
 .primary b { float: right; font-size: 20px; }
 #start-screen .primary { padding-inline: 18px; border-radius: 2px; clip-path: none; box-shadow: 0 10px 28px rgba(0,0,0,.18); }
 #start-screen .primary b { width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; margin-top: -3px; border: 1px solid rgba(21,20,15,.36); border-radius: 50%; font-size: 16px; font-weight: 500; }
+.tutorial-entry { width: min(360px,100%); min-height: 44px; display: flex; align-items: center; justify-content: space-between; margin-top: 6px; padding: 0 3px; border: 0; border-bottom: 1px solid rgba(244,241,232,.18); background: transparent; color: rgba(244,241,232,.72); font: 600 11px var(--font-ui); text-align: left; cursor: pointer; }
+.tutorial-entry:hover { border-color: var(--yellow); color: var(--yellow); }
+.tutorial-entry b { width: 24px; height: 24px; display: grid; place-items: center; border: 1px solid currentColor; border-radius: 50%; font-size: 12px; }
 .screen > small, .controls-footnote { margin-top: 14px; color: rgba(244,241,232,.38); font-size: 10px; letter-spacing: .03em; }
 .secondary { width: min(320px,100%); min-height: 48px; border: 0; border-bottom: 1px solid rgba(255,255,255,.18); background: transparent; color: #f1efea; font-size: 12px; cursor: pointer; }
 .secondary:hover { color: var(--yellow); border-color: var(--yellow); }
@@ -306,6 +310,31 @@ body:not(.touch-mode) .note-copy small { color: #f4f1e8; opacity: 1; }
 .rank-name-error { display: block; min-height: 28px; padding-top: 7px; color: #ff8e7d; font-size: 10px; }
 .rank-intro-dialog .primary { width: 100%; }
 .rank-intro-dialog .secondary { width: 100%; }
+.tutorial-intro-screen { z-index: 14; justify-content: flex-start; overflow-y: auto; padding: 24px; background: radial-gradient(circle at 50% 38%, rgba(42,40,31,.46), rgba(10,10,8,.98) 66%); }
+.tutorial-intro-dialog { width: min(620px,100%); margin: auto; text-align: left; }
+.tutorial-intro-dialog .eyebrow { margin-bottom: 9px; }
+.tutorial-intro-dialog h2 { margin: 0; font: 700 clamp(42px,6vw,68px)/.98 var(--font-ui); letter-spacing: -.055em; text-wrap: balance; word-break: keep-all; }
+.tutorial-intro-dialog > p { margin: 18px 0; color: rgba(244,241,232,.68); font-size: 13px; line-height: 1.65; word-break: keep-all; }
+.tutorial-progress { display: grid; grid-template-columns: repeat(3,1fr); margin: 0 0 18px; padding: 0; border-block: 1px solid rgba(244,241,232,.16); list-style: none; }
+.tutorial-progress li { position: relative; min-height: 54px; display: grid; place-items: center; color: rgba(244,241,232,.34); font-size: 16px; font-weight: 700; }
+.tutorial-progress li + li { border-left: 1px solid rgba(244,241,232,.1); }
+.tutorial-progress li.active { color: var(--yellow); }
+.tutorial-progress li.active::after { content: ''; position: absolute; right: 20%; bottom: -1px; left: 20%; height: 2px; background: var(--yellow); }
+.tutorial-progress li.done { color: rgba(244,241,232,.72); }
+.tutorial-progress li.done::before { content: '✓'; margin-right: 5px; color: var(--yellow); font-size: 11px; }
+.tutorial-goal { display: grid; gap: 5px; padding: 15px 17px; border-left: 3px solid var(--yellow); background: rgba(244,185,66,.07); }
+.tutorial-goal span { color: rgba(244,241,232,.5); font-size: 10px; }
+.tutorial-goal b { font-size: 15px; }
+.tutorial-goal small { color: rgba(244,241,232,.62); font-size: 11px; line-height: 1.5; word-break: keep-all; }
+.tutorial-intro-dialog .primary { width: 100%; margin-top: 18px; }
+.tutorial-intro-dialog .secondary { width: 100%; }
+.tutorial-hud { z-index: 6; left: 50%; bottom: 68px; width: min(440px,calc(100vw - 32px)); display: grid; gap: 3px; padding: 10px 14px; border-left: 3px solid var(--yellow); background: rgba(13,14,12,.82); color: #f4f1e8; text-align: left; transform: translateX(-50%); backdrop-filter: blur(10px); pointer-events: none; }
+.tutorial-hud[hidden] { display: none; }
+.tutorial-hud span { color: var(--yellow); font-size: 9px; font-weight: 700; letter-spacing: .08em; }
+.tutorial-hud b { font-size: 11px; font-weight: 600; line-height: 1.4; word-break: keep-all; }
+.tutorial-mode .speed-controls { display: none; }
+.tutorial-result-status { width: min(520px,80vw); margin: -12px 0 24px !important; color: rgba(244,241,232,.7) !important; font-size: 12px !important; line-height: 1.6 !important; word-break: keep-all; }
+.tutorial-result-status[hidden] { display: none; }
 .pause-screen h2, .result-screen h2 { margin: 0; font: 700 clamp(58px,9vw,108px)/.9 var(--font-ui); letter-spacing: -.06em; }
 .pause-screen h2 { color: var(--yellow); }
 .pause-screen h2 + .primary { margin-top: 28px; }
@@ -552,12 +581,21 @@ kbd.wide-key { min-width: 80px; }
   .rank-route { margin-bottom: 14px; }
   .rank-route li { min-height: 50px; font-size: 18px; }
   .rank-score-guide { padding: 11px 12px; }
+  .tutorial-intro-screen { padding: calc(20px + env(safe-area-inset-top)) max(18px,env(safe-area-inset-right)) calc(20px + env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left)); }
+  .tutorial-intro-dialog h2 { font-size: 38px; }
+  .tutorial-intro-dialog > p { margin: 14px 0; font-size: 12px; }
+  .tutorial-progress { margin-bottom: 14px; }
+  .tutorial-progress li { min-height: 48px; }
+  .tutorial-goal { padding: 12px 13px; }
+  .tutorial-hud { bottom: calc(70px + env(safe-area-inset-bottom)); width: min(330px,calc(100vw - 28px)); padding: 8px 11px; }
+  .touch-mode.selection-active .tutorial-hud { bottom: calc(180px + env(safe-area-inset-bottom)); }
   .rank-name-field { margin-top: 14px; }
   .primary { width: 100%; min-height: 56px; }
   .screen > small { align-self: flex-start; line-height: 1.45; }
   .pause-screen h2, .result-screen h2 { font-size: clamp(50px,15vw,72px); }
   .pause-screen h2 + .primary { margin-top: 22px; }
   .reveal { width: 100%; margin: 24px 0; }
+  .tutorial-result-status { width: 100%; margin-bottom: 18px !important; font-size: 11px !important; }
   .reveal div { padding: 16px 8px; }
   .reveal b { font-size: 16px; }
   .score-summary { width: 100%; margin-bottom: 24px; }
