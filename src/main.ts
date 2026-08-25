@@ -97,7 +97,7 @@ const RULES: RuleDefinition[] = [
   { id:'redJump', action:'jump', stimulus:'red', label:{ko:'빨강 점프',en:'RED JUMP'}, note:{ko:'빨간 옷을 입은 사람 가까이 가면 점프합니다.',en:'Jumps when near someone in a red shirt.'} },
   { id:'blueSpin', action:'spin', stimulus:'blue', label:{ko:'파랑 회전',en:'BLUE SPIN'}, note:{ko:'파란 옷을 입은 사람 가까이 가면 회전합니다.',en:'Spins when near someone in a blue shirt.'} },
   { id:'yellowWave', action:'wave', stimulus:'yellow', label:{ko:'노랑 인사',en:'YELLOW WAVE'}, note:{ko:'노란 옷을 입은 사람 가까이 가면 손을 흔듭니다.',en:'Waves when near someone in a yellow shirt.'} },
-  { id:'hatBow', action:'bow', stimulus:'hat', label:{ko:'모자에게 인사',en:'HAT BOW'}, note:{ko:'모자를 쓴 사람 가까이 가면 허리를 숙입니다.',en:'Bows when near someone wearing a hat.'} },
+  { id:'hatBow', action:'bow', stimulus:'hat', label:{ko:'모자 쓴 사람 앞에서 허리 숙이기',en:'HAT BOW'}, note:{ko:'모자를 쓴 사람 가까이 가면 허리를 숙입니다.',en:'Bows when near someone wearing a hat.'} },
   { id:'centerCrouch', action:'crouch', label:{ko:'중앙 쪼그리기',en:'CENTER CROUCH'}, note:{ko:'중앙 구역에 들어가면 쪼그려 앉습니다.',en:'Crouches when entering the center zone.'} },
   { id:'edgeStar', action:'star', label:{ko:'가장자리 별 자세',en:'EDGE STAR'}, note:{ko:'맵 가장자리에 들어가면 별 자세를 합니다.',en:'Makes a star pose when entering the map edge.'} },
   { id:'bellZoneSideKick', action:'sideKick', label:{ko:'종탑 옆차기',en:'BELL TOWER SIDE KICK'}, note:{ko:'종탑 근처에 가면 옆차기를 합니다.',en:'Side-kicks when approaching the bell tower.'} },
