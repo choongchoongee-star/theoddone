@@ -73,7 +73,7 @@ https://github.com/choongchoongee-star/theoddone
 
 - 파일: `submission-assets/the-odd-one-thumbnail-1280x720.png`
 - 크기: 1280×720, 16:9 PNG
-- 실제 게임 시작 화면을 촬영했으며 현재 로고, 3D NPC와 UI를 그대로 사용했다.
+- 공개 페이지의 Open Graph·공유 미리보기 이미지로도 같은 썸네일을 사용한다.
 
 ![THE ODD ONE 제출 썸네일](submission-assets/the-odd-one-thumbnail-1280x720.png)
 
