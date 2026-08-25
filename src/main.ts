@@ -130,7 +130,7 @@ const TUTORIAL_STAGES:TutorialStage[]=[
     description:{ko:'이번에는 가짜 규칙이 하나 섞입니다. 여섯 명 중 다섯 명이 따르는 규칙이 진짜입니다.',en:'One fake rule is mixed in. The rule followed by five of six people is the true one.'},
     goal:{ko:'진짜 규칙 1개 + 가짜 규칙 1개',en:'1 TRUE RULE + 1 FAKE RULE'},
     tip:{ko:'일부만 따르는 규칙보다 거의 모두가 따르는 규칙을 찾으세요.',en:'LOOK FOR THE RULE ALMOST EVERYONE FOLLOWS.'},
-    result:{ko:'가짜 규칙은 일부만 따릅니다. 진짜 규칙의 한 명짜리 예외를 찾으세요.',en:'ONLY SOME PEOPLE FOLLOW A FAKE RULE. FIND THE SINGLE EXCEPTION TO THE TRUE RULE.'},
+    result:{ko:'가짜 규칙은 일부만 따릅니다. 진짜 규칙을 어기는 단 한 명을 찾으세요.',en:'ONLY SOME PEOPLE FOLLOW A FAKE RULE. FIND THE ONE PERSON WHO BREAKS THE TRUE RULE.'},
   },
   {
     participants:6,rules:['lampSideStep','centerCrouch'],targetRuleId:'lampSideStep',oddSubjectIndex:4,noiseObeyerIndices:[0,2,5],bellRuleId:'centerCrouch',bellObeyerIndices:[1,3,5],
@@ -144,16 +144,33 @@ const TUTORIAL_STAGES:TutorialStage[]=[
 let RULE_NOTE_ORDER:RuleNoteId[]=[...RULES.slice(0,4).map(rule=>rule.id),'bell'];
 const ruleNoteMarks={} as Record<RuleNoteId,RuleNoteMark>;
 [...RULES.map(rule=>rule.id),'bell' as const].forEach(ruleId=>ruleNoteMarks[ruleId]=null);
-const ACTION_LABELS:Record<ActionName,LocalizedCopy>={jump:{ko:'점프',en:'JUMP'},wave:{ko:'손 흔들기',en:'WAVE'},spin:{ko:'회전',en:'SPIN'},bow:{ko:'허리 숙이기',en:'BOW'},crouch:{ko:'쪼그려 앉기',en:'CROUCH'},sideKick:{ko:'옆차기',en:'SIDE KICK'},sideStep:{ko:'좌우 스텝',en:'SIDE-STEP'},star:{ko:'별 자세',en:'STAR POSE'}};
 const ACTION_VERBS:Record<ActionName,LocalizedCopy>={jump:{ko:'점프합니다',en:'jump'},wave:{ko:'손을 흔듭니다',en:'wave'},spin:{ko:'회전합니다',en:'spin'},bow:{ko:'허리를 숙입니다',en:'bow'},crouch:{ko:'쪼그려 앉습니다',en:'crouch'},sideKick:{ko:'옆차기를 합니다',en:'side-kick'},sideStep:{ko:'좌우 스텝을 합니다',en:'side-step'},star:{ko:'별 자세를 합니다',en:'make a star pose'}};
 const ACTION_DURATION:Record<ActionName,number>={jump:1.25,wave:1.25,spin:1.3,bow:1.25,crouch:1.45,sideKick:1.25,sideStep:1.4,star:1.25};
 
 const canvas = document.querySelector<HTMLCanvasElement>('#game')!;
+const webglErrorScreen = document.querySelector<HTMLElement>('#webgl-error-screen')!;
+const webglReloadButton = document.querySelector<HTMLButtonElement>('#webgl-reload-button')!;
 const pageParams = new URLSearchParams(location.search);
 const qaMode = pageParams.get('qa') === '1';
 const touchMode = matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0 || pageParams.has('touch');
 document.body.classList.toggle('touch-mode', touchMode);
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+webglReloadButton.addEventListener('click',()=>location.reload());
+function showWebglError() {
+  webglErrorScreen.classList.add('open');webglErrorScreen.setAttribute('aria-hidden','false');
+}
+let renderer:THREE.WebGLRenderer;
+try { renderer=new THREE.WebGLRenderer({ canvas, antialias: true }); }
+catch(error) { console.error('WebGL renderer could not be created.',error);showWebglError();throw error; }
+let webglContextLost=false;
+canvas.addEventListener('webglcontextlost',event=>{
+  event.preventDefault();webglContextLost=true;beginClockExclusion('webgl');
+  keys.clear();cancelTouchPointers();document.body.style.cursor='auto';
+  if(document.pointerLockElement)void document.exitPointerLock();
+  showWebglError();
+});
+canvas.addEventListener('webglcontextrestored',()=>{
+  webglContextLost=false;endClockExclusion('webgl');webglErrorScreen.classList.remove('open');webglErrorScreen.setAttribute('aria-hidden','true');
+});
 renderer.setPixelRatio(Math.min(devicePixelRatio, touchMode ? 1.5 : 2));
 renderer.setSize(innerWidth, innerHeight);
 renderer.shadowMap.enabled = true;
@@ -353,6 +370,9 @@ let simulationTime = 0;
 let roundStartedAt = 0;
 let casualPausedMs = 0;
 let casualPauseStartedAt = 0;
+let clockExcludedMs = 0;
+let clockExclusionStartedAt = 0;
+const clockExclusionReasons=new Set<'verdict'|'webgl'>();
 let bellTimer:number = INITIAL_BELL_INTERVAL[0];
 let bellEnabled=true;
 let observationEncounter:ObservationEncounter|null=null;
@@ -661,7 +681,7 @@ function renderLeaderboard() {
     const message=document.createElement('div');message.className='leaderboard-message';message.textContent=copy('랭킹을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.','COULD NOT LOAD THE LEADERBOARD. TRY AGAIN SOON.');leaderboardList.append(message);return;
   }
   if(!leaderboardEntries.length) {
-    const message=document.createElement('div');message.className='leaderboard-message';message.textContent=copy('아직 기록이 없습니다. 첫 클리어를 남겨보세요.','NO RECORDS YET. CLAIM THE FIRST CLEAR.');leaderboardList.append(message);return;
+    const message=document.createElement('div');message.className='leaderboard-message';message.textContent=copy('아직 기록이 없습니다. 첫 완주 기록을 남겨보세요.','NO RECORDS YET. COMPLETE THE FIRST RANKED RUN.');leaderboardList.append(message);return;
   }
   let displayedRank=0;
   leaderboardEntries.forEach((entry,index)=>{
@@ -1221,7 +1241,7 @@ function configureRound() {
   });
   activeSubjects.forEach((subject,index)=>subject.root.position.set((index%columns-(columns-1)/2)*6.5,0,(Math.floor(index/columns)-(rows-1)/2)*7));
   validateRoundConfiguration();
-  attemptLimit=attemptLimitForParticipants();attempts=attemptLimit;roundElapsedTime=0;simulationTime=0;resetObservationScheduler();proximityTimer=0;roundStartedAt=performance.now();casualPausedMs=0;casualPauseStartedAt=0;bellTimer=THREE.MathUtils.randFloat(INITIAL_BELL_INTERVAL[0],INITIAL_BELL_INTERVAL[1]);renderRuleNotes();updateAttempts();resetRuleNotes();
+  attemptLimit=attemptLimitForParticipants();attempts=attemptLimit;roundElapsedTime=0;simulationTime=0;resetObservationScheduler();proximityTimer=0;roundStartedAt=performance.now();casualPausedMs=0;casualPauseStartedAt=0;resetClockExclusions();bellTimer=THREE.MathUtils.randFloat(INITIAL_BELL_INTERVAL[0],INITIAL_BELL_INTERVAL[1]);renderRuleNotes();updateAttempts();resetRuleNotes();
 }
 
 function validateRoundConfiguration() {
@@ -1277,15 +1297,20 @@ function ringBell() {
     resetActionPose(subject);
     subject.action=bellAction;subject.actionTime=0;
   });
-  bellVisualTime=1.2;bell.scale.set(1.3,.8,1.3);playBellSound();showToast(copy(`종 이벤트 · ${ACTION_LABELS[bellAction].ko}`,`BELL EVENT · ${ACTION_LABELS[bellAction].en}`),false,900);
+  bellVisualTime=1.2;bell.scale.set(1.3,.8,1.3);playBellSound();showToast(copy(`종이 울려 일부 참가자가 ${ACTION_VERBS[bellAction].ko}.`,`THE BELL RINGS, AND SOME PARTICIPANTS ${ACTION_VERBS[bellAction].en}.`),false,1100);
 }
 
 function ensureAudioContext() {
   if(!soundEnabled)return null;
   if(audioContext)return audioContext;
   const AudioCtx=window.AudioContext || (window as typeof window & {webkitAudioContext:typeof AudioContext}).webkitAudioContext;
-  audioContext=new AudioCtx();masterGain=audioContext.createGain();masterGain.gain.value=soundVolume;masterGain.connect(audioContext.destination);
-  return audioContext;
+  if(!AudioCtx){soundEnabled=false;updateSoundButtons();return null;}
+  try {
+    audioContext=new AudioCtx();masterGain=audioContext.createGain();masterGain.gain.value=soundVolume;masterGain.connect(audioContext.destination);
+    return audioContext;
+  } catch(error) {
+    console.warn('Audio could not be initialized. Continuing without sound.',error);audioContext=null;masterGain=null;soundEnabled=false;updateSoundButtons();return null;
+  }
 }
 
 function syncAudioMix() {
@@ -1605,11 +1630,12 @@ function updateVerdictCamera(now:number) {
 }
 
 function clearVerdictSequence() {
-  verdictSequenceId++;resolvingAccusation=false;verdictCamera=null;hideVerdictFeedback();document.body.classList.remove('verdict-active');
+  verdictSequenceId++;endClockExclusion('verdict');resolvingAccusation=false;verdictCamera=null;hideVerdictFeedback();document.body.classList.remove('verdict-active');
 }
 
 function beginRecoverableWrongVerdict(subject:Subject) {
   const sequence=++verdictSequenceId;const returnPosition=camera.position.clone();const returnQuaternion=camera.quaternion.clone();
+  updateRoundClock();beginClockExclusion('verdict');
   resolvingAccusation=true;keys.clear();cancelTouchPointers();document.body.classList.add('verdict-active');syncAudioMix();
   subject.marker.material.color.set(0xe65b47);subject.marker.material.opacity=1;focusVerdictCamera(subject,.5);
   setVerdictFeedback('wrong',copy('오답','WRONG'));playInterfaceSound('wrong');
@@ -1619,7 +1645,7 @@ function beginRecoverableWrongVerdict(subject:Subject) {
   },850);
   window.setTimeout(()=>{
     if(sequence!==verdictSequenceId)return;
-    camera.position.copy(returnPosition);camera.quaternion.copy(returnQuaternion);verdictCamera=null;resolvingAccusation=false;document.body.classList.remove('verdict-active');syncAudioMix();
+    camera.position.copy(returnPosition);camera.quaternion.copy(returnQuaternion);verdictCamera=null;endClockExclusion('verdict');resolvingAccusation=false;document.body.classList.remove('verdict-active');syncAudioMix();
     showToast(copy(`정답이 아닙니다 · 기회 ${attempts}번 남음`,`NOT THE ANSWER · ${attempts} CHANCE${attempts===1?'':'S'} LEFT`),true,1400);
   },1380);
 }
@@ -1674,10 +1700,26 @@ function setPaused(value:boolean) {
   syncAudioMix();
 }
 
+function beginClockExclusion(reason:'verdict'|'webgl',now=performance.now()) {
+  if(clockExclusionReasons.has(reason))return;
+  if(clockExclusionReasons.size===0)clockExclusionStartedAt=now;
+  clockExclusionReasons.add(reason);
+}
+
+function endClockExclusion(reason:'verdict'|'webgl',now=performance.now()) {
+  if(!clockExclusionReasons.delete(reason))return;
+  if(clockExclusionReasons.size===0&&clockExclusionStartedAt){clockExcludedMs+=now-clockExclusionStartedAt;clockExclusionStartedAt=0;}
+}
+
+function resetClockExclusions() {
+  clockExcludedMs=0;clockExclusionStartedAt=0;clockExclusionReasons.clear();
+}
+
 function updateRoundClock(now=performance.now()) {
   if(!roundStartedAt)return;
   const currentPause=gameMode!=='ranked'&&paused&&casualPauseStartedAt?now-casualPauseStartedAt:0;
-  roundElapsedTime=Math.max(0,(now-roundStartedAt-casualPausedMs-currentPause)/1000);
+  const currentExclusion=clockExclusionReasons.size>0&&clockExclusionStartedAt?now-clockExclusionStartedAt:0;
+  roundElapsedTime=Math.max(0,(now-roundStartedAt-casualPausedMs-currentPause-clockExcludedMs-currentExclusion)/1000);
 }
 
 function updateSoundButtons() {
@@ -1778,8 +1820,20 @@ function showRoundTransition() {
 function startRound(){
   if(roundStarting)return;
   clearVerdictSequence();roundStarting=true;updateGameModeUI();
-  configureRound();playing=true;paused=false;roundResult=null;completedRoundShareResult=null;pointerLockAcquired=false;altCursorMode=false;setSystemCursorOverride(false);setFollowSubject(null,false);document.body.classList.add('round-active');document.body.classList.remove('paused','cursor-free');selectSubject(null);document.querySelector('#start-screen')!.classList.remove('open');document.querySelector('#end-screen')!.classList.remove('open');document.querySelector('#pause-screen')!.classList.remove('open');tutorialIntroScreen.classList.remove('open');tutorialIntroScreen.setAttribute('aria-hidden','true');tutorialHud.hidden=gameMode!=='tutorial';if(touchMode)initializeMobileCamera();else{camera.fov=62;camera.updateProjectionMatrix();desktopCameraHeight=Math.max(8,arenaSize*.22);camera.position.set(0,desktopCameraHeight,arenaHalf*.82);yaw=0;pitch=-.28;desktopFreePosition.copy(camera.position);desktopFreeYaw=yaw;desktopFreePitch=pitch;camera.rotation.set(pitch,yaw,0);requestGamePointerLock()}
-  startAmbientSound();playInterfaceSound('start');showRoundTransition();roundStarting=false;updateGameModeUI();
+  try {
+    let configurationError:unknown;
+    for(let attempt=0;attempt<3;attempt++) {
+      try { configureRound();configurationError=undefined;break; }
+      catch(error) { configurationError=error;console.warn(`Round configuration attempt ${attempt+1} failed.`,error); }
+    }
+    if(configurationError)throw configurationError;
+    playing=true;paused=false;roundResult=null;completedRoundShareResult=null;pointerLockAcquired=false;altCursorMode=false;setSystemCursorOverride(false);setFollowSubject(null,false);document.body.classList.add('round-active');document.body.classList.remove('paused','cursor-free');selectSubject(null);document.querySelector('#start-screen')!.classList.remove('open');document.querySelector('#end-screen')!.classList.remove('open');document.querySelector('#pause-screen')!.classList.remove('open');tutorialIntroScreen.classList.remove('open');tutorialIntroScreen.setAttribute('aria-hidden','true');tutorialHud.hidden=gameMode!=='tutorial';if(touchMode)initializeMobileCamera();else{camera.fov=62;camera.updateProjectionMatrix();desktopCameraHeight=Math.max(8,arenaSize*.22);camera.position.set(0,desktopCameraHeight,arenaHalf*.82);yaw=0;pitch=-.28;desktopFreePosition.copy(camera.position);desktopFreeYaw=yaw;desktopFreePitch=pitch;camera.rotation.set(pitch,yaw,0);requestGamePointerLock()}
+    startAmbientSound();playInterfaceSound('start');showRoundTransition();
+  } catch(error) {
+    console.error('The round could not be started.',error);playing=false;paused=false;restoreSystemCursor();document.body.classList.remove('round-active','paused','cursor-free');document.querySelector('#start-screen')!.classList.add('open');showToast(copy('게임을 시작하지 못했습니다. 다시 시도해 주세요.','THE GAME COULD NOT START. PLEASE TRY AGAIN.'),true,2600);
+  } finally {
+    roundStarting=false;updateGameModeUI();
+  }
 }
 
 function calculateRoundScore() {
@@ -1872,7 +1926,7 @@ function updateResultCopy(){
   else if(rankedRunState==='failed')resultTitle.textContent=copy('랭크 도전 실패','RANKED RUN FAILED');
   else if(ranked&&success)resultTitle.textContent=copy(`${participantCount}명 클리어`,`CLEARED ${participantCount} NPCS`);
   else resultTitle.textContent=success?copy('정답입니다.','CORRECT.'):copy('추리에 실패했습니다.','CASE FAILED.');
-  document.querySelector('#reveal-rule')!.textContent=targetRule.label[language];
+  document.querySelector('#reveal-rule')!.textContent=targetRule.note[language];
   document.querySelector('#reveal-npc')!.textContent=subjects[oddId].name;
   scoreSummary.hidden=!success||tutorial;
   scoreSummary.classList.toggle('single',!ranked);
@@ -2090,6 +2144,7 @@ const incomingSharedResult=parseSharedResult();if(incomingSharedResult)openShare
 const clock=new THREE.Clock(); let proximityTimer=0;
 function frame(){
   requestAnimationFrame(frame);if(!pointerLockAllowed()&&document.pointerLockElement)releasePointerLockNow();const realDt=Math.min(clock.getDelta(),.05);const now=performance.now();
+  if(webglContextLost)return;
   dust.rotation.y+=realDt*.006;dust.position.y=Math.sin(now*.00017)*.05;
   lampLights.forEach((lamp,index)=>lamp.intensity=17*(.97+Math.sin(now*.0007+index*1.73)*.025));
   if(verdictCamera)updateVerdictCamera(now);

@@ -168,6 +168,11 @@ body:not(.touch-mode) .note-copy small { color: #f4f1e8; opacity: 1; }
 /* Full-screen states */
 .screen { position: fixed; z-index: 10; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center; background: rgba(11,12,10,.9); opacity: 0; visibility: hidden; transition: opacity .35s, visibility .35s; }
 .screen.open { opacity: 1; visibility: visible; }
+.webgl-error-screen { z-index: 30; background: rgba(8,9,7,.98); }
+.webgl-error-card { width: min(520px,100%); text-align: left; }
+.webgl-error-card h2 { margin: 12px 0 0; font: 700 clamp(30px,5vw,52px)/1.08 var(--font-ui); letter-spacing: -.045em; }
+.webgl-error-card p { margin: 18px 0 26px; }
+.webgl-error-card .primary { width: 100%; }
 #start-screen { align-items: flex-start; padding: clamp(44px,7vw,100px) clamp(28px,8vw,130px); overflow-y: auto; text-align: left; background: linear-gradient(90deg, rgba(10,11,9,.98) 0 38%, rgba(10,11,9,.82) 56%, rgba(10,11,9,.2) 100%), linear-gradient(0deg, rgba(10,11,9,.65), transparent 48%); }
 .eyebrow { margin-bottom: 20px; color: var(--yellow); font: 500 11px var(--font-ui); letter-spacing: .1em; }
 .screen h1 { margin: 0; font: 700 clamp(64px,8vw,118px)/.78 'Space Grotesk', sans-serif; letter-spacing: -.075em; }

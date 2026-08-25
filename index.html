@@ -9,6 +9,14 @@
   <body>
     <div id="app">
       <canvas id="game"></canvas>
+      <section id="webgl-error-screen" class="screen webgl-error-screen" role="alert" aria-hidden="true">
+        <div class="webgl-error-card">
+          <span class="eyebrow" data-ko="3D 화면 오류" data-en="3D DISPLAY ERROR">3D 화면 오류</span>
+          <h2 data-ko="게임 화면을 불러오지 못했습니다." data-en="THE GAME VIEW COULD NOT BE LOADED.">게임 화면을 불러오지 못했습니다.</h2>
+          <p data-ko="브라우저를 다시 불러온 뒤에도 문제가 계속되면 다른 브라우저에서 실행해 주세요." data-en="Reload the page. If the problem continues, try another browser.">브라우저를 다시 불러온 뒤에도 문제가 계속되면 다른 브라우저에서 실행해 주세요.</p>
+          <button id="webgl-reload-button" class="primary" type="button"><span data-ko="다시 불러오기" data-en="RELOAD">다시 불러오기</span><b>↻</b></button>
+        </div>
+      </section>
       <div class="noise"></div>
       <div id="round-transition" class="round-transition" aria-hidden="true"><span data-ko="관찰 시작" data-en="OBSERVATION START">관찰 시작</span></div>
       <div id="verdict-feedback" class="verdict-feedback" aria-live="assertive" aria-hidden="true">
@@ -266,8 +274,8 @@
         <div id="result-kicker" class="eyebrow"></div>
         <h2 id="result-title"></h2>
         <div class="reveal">
-          <div><span data-ko="정답 규칙" data-en="TARGET RULE">정답 규칙</span><b id="reveal-rule"></b></div>
-          <div><span data-ko="홀로 다른 참가자" data-en="ODD NPC">홀로 다른 참가자</span><b id="reveal-npc"></b></div>
+          <div><span data-ko="진짜 규칙" data-en="TRUE RULE">진짜 규칙</span><b id="reveal-rule"></b></div>
+          <div><span data-ko="규칙을 어긴 참가자" data-en="RULE BREAKER">규칙을 어긴 참가자</span><b id="reveal-npc"></b></div>
         </div>
         <div id="score-summary" class="score-summary" hidden>
           <div><span data-ko="이번 라운드" data-en="THIS ROUND">이번 라운드</span><b id="round-score">0</b></div>
