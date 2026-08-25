@@ -122,7 +122,7 @@ const TUTORIAL_STAGES:TutorialStage[]=[
     description:{ko:'하나뿐인 규칙을 반복해서 관찰하세요. 네 명 중 이 규칙을 혼자 어기는 사람을 찾으면 됩니다.',en:'Watch the only rule repeat. Find the one person out of four who breaks it.'},
     goal:{ko:'진짜 규칙만 등장합니다',en:'ONLY THE TRUE RULE APPEARS'},
     tip:{ko:'중앙에 들어간 사람들의 행동을 비교하세요.',en:'COMPARE WHAT PEOPLE DO WHEN THEY ENTER THE CENTER.'},
-    result:{ko:'진짜 규칙은 모두에게 공통이지만, 한 명만 어깁니다.',en:'THE TRUE RULE IS SHARED BY EVERYONE EXCEPT ONE PERSON.'},
+    result:{ko:'진짜 규칙은 한 명을 제외한 모두가 지킵니다.',en:'EVERYONE EXCEPT ONE PERSON FOLLOWS THE TRUE RULE.'},
   },
   {
     participants:6,rules:['centerCrouch','edgeStar'],targetRuleId:'edgeStar',oddSubjectIndex:1,noiseObeyerIndices:[0,2,4],bellRuleId:null,bellObeyerIndices:[],
@@ -1620,7 +1620,7 @@ function beginRecoverableWrongVerdict(subject:Subject) {
   window.setTimeout(()=>{
     if(sequence!==verdictSequenceId)return;
     camera.position.copy(returnPosition);camera.quaternion.copy(returnQuaternion);verdictCamera=null;resolvingAccusation=false;document.body.classList.remove('verdict-active');syncAudioMix();
-    showToast(copy(`${subject.name} 확인 완료 · 기회 ${attempts}번 남음`,`${subject.name} INSPECTED · ${attempts} CHANCE${attempts===1?'':'S'} LEFT`),true,1400);
+    showToast(copy(`정답이 아닙니다 · 기회 ${attempts}번 남음`,`NOT THE ANSWER · ${attempts} CHANCE${attempts===1?'':'S'} LEFT`),true,1400);
   },1380);
 }
 
@@ -1641,7 +1641,7 @@ function beginVerdict(subject:Subject,success:boolean) {
 
 function accuse(subject=hovered) {
   if(!playing||paused||resolvingAccusation||!subject)return;
-  if(subject.inspected){showToast(copy(`${subject.name}은(는) 이미 확인했습니다.`,`${subject.name} WAS ALREADY INSPECTED.`),true,1200);return;}
+  if(subject.inspected){showToast(copy('이미 확인한 참가자입니다.','THIS PARTICIPANT WAS ALREADY INSPECTED.'),true,1200);return;}
   if(subject.id===oddId){beginVerdict(subject,true);return;}
   attempts--;subject.inspected=true;subject.inspectedSprite.material.opacity=1;updateAttempts();
   subject.marker.material.color.set(0xe65b47);
@@ -1871,7 +1871,7 @@ function updateResultCopy(){
   else if(rankedRunState==='completed')resultTitle.textContent=copy('랭크 완주!','RANKED RUN COMPLETE!');
   else if(rankedRunState==='failed')resultTitle.textContent=copy('랭크 도전 실패','RANKED RUN FAILED');
   else if(ranked&&success)resultTitle.textContent=copy(`${participantCount}명 클리어`,`CLEARED ${participantCount} NPCS`);
-  else resultTitle.textContent=success?copy('찾았습니다.','YOU FOUND IT.'):copy('추리에 실패했습니다.','CASE FAILED.');
+  else resultTitle.textContent=success?copy('정답입니다.','CORRECT.'):copy('추리에 실패했습니다.','CASE FAILED.');
   document.querySelector('#reveal-rule')!.textContent=targetRule.label[language];
   document.querySelector('#reveal-npc')!.textContent=subjects[oddId].name;
   scoreSummary.hidden=!success||tutorial;
@@ -1926,7 +1926,7 @@ async function saveCompletedRankedRun() {
     if(requestId!==rankedSaveRequestId)return;
     try {
       leaderboardEntries=await loadLeaderboard();
-      rankedPlacement=findLeaderboardPlacement(leaderboardEntries,user.uid);
+      rankedPlacement=improved?findLeaderboardPlacement(leaderboardEntries,user.uid):null;
       leaderboardFailed=false;
     } catch(error) {
       console.warn('Leaderboard placement could not be loaded.',error);

@@ -336,7 +336,7 @@ body:not(.touch-mode) .note-copy small { color: #f4f1e8; opacity: 1; }
 .tutorial-intro-dialog .secondary { width: 100%; }
 .tutorial-hud { z-index: 6; left: 50%; bottom: 68px; width: min(440px,calc(100vw - 32px)); display: grid; gap: 3px; padding: 10px 14px; border-left: 3px solid var(--yellow); background: rgba(13,14,12,.82); color: #f4f1e8; text-align: left; transform: translateX(-50%); backdrop-filter: blur(10px); pointer-events: none; }
 .tutorial-hud[hidden] { display: none; }
-.tutorial-hud span { color: var(--yellow); font-size: 9px; font-weight: 700; letter-spacing: .08em; }
+.tutorial-hud span { color: var(--yellow); font-size: 10px; font-weight: 700; letter-spacing: .08em; }
 .tutorial-hud b { font-size: 11px; font-weight: 600; line-height: 1.4; word-break: keep-all; }
 .tutorial-mode .speed-controls { display: none; }
 .tutorial-result-status { width: min(520px,80vw); margin: -12px 0 24px !important; color: rgba(244,241,232,.7) !important; font-size: 12px !important; line-height: 1.6 !important; word-break: keep-all; }
